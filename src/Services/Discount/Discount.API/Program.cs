@@ -24,5 +24,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await app.SeedCouponData(builder);
+app.SeedCouponData(builder);
 app.Run();
