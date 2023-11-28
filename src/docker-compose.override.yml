@@ -46,3 +46,39 @@ services:
       - basket.db
     ports:
       - "8001:80"
+
+
+  discount.db:
+    container_name: discount.db
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=DiscountDb
+  
+  pgadmin:
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    volumes:
+      - "pgadmin_data:/root/.pgadmin"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    depends_on:
+      - discount.db
+  
+  discount.api:
+    container_name: discount.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings:ConnectionString=Server=discount.db; Port=5432; Database=DiscountDb; User Id=admin; Password=admin; "
+    depends_on:
+      - discount.db
+    ports:
+      - "8002:80"
