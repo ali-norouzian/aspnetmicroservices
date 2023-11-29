@@ -44,9 +44,21 @@ services:
       dockerfile: Services/Discount/Discount.Grpc/Dockerfile
 
 
+  order.db:
+    image: mcr.microsoft.com/mssql/server:2022-CU10-ubuntu-22.04
+
+  order.api:
+    image: ${DOCKER_REGISTRY-}order.api
+    build:
+      context: .
+      dockerfile: Services/Ordering/Ordering.API/Dockerfile
+
+
 volumes:
   mongo_data:
   portainer_data:
   postgres_data:
   pgadmin_data:
+  mssqls_data:
   
+

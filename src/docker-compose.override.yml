@@ -93,3 +93,27 @@ services:
       - discount.db
     ports:
       - "8003:80"
+
+
+  order.db:
+    container_name: order.db
+    restart: always
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqls_data:/var/opt/mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=admin@1234
+      - MSSQL_PID=Developer
+
+  order.api:
+    container_name: order.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:OrderingConnectionString=Server=localhost; Database=OrderDb; User Id=sa; Password=admin@1234; "
+    depends_on:
+      - order.db
+    ports:
+      - "8004:80"
+
