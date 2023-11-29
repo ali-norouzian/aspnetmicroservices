@@ -4,6 +4,9 @@ services:
   portainer:
     image: portainer/portainer-ce:2.19.3-alpine
 
+  rabbitmq:
+    image: rabbitmq:3.12.9-management-alpine
+
 
   catalog.db:
     image: mongo:7.0.2
@@ -60,5 +63,6 @@ volumes:
   postgres_data:
   pgadmin_data:
   mssqls_data:
+  rabbitmq_data:
   
 
