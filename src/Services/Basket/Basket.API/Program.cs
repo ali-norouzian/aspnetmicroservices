@@ -32,7 +32,6 @@ builder.Services.AddMassTransit(config =>
         cfg.Host(host);
     });
 });
-// builder.Services.AddMassTransitHostedService();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

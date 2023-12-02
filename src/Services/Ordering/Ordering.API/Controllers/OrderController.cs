@@ -16,7 +16,7 @@ namespace Ordering.API.Controllers
 
         public OrderController(IMediator mediator)
         {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _mediator = mediator;
         }
 
         [HttpGet("{userName}", Name = "GetOrder")]
