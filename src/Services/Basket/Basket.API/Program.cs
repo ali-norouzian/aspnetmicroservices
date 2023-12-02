@@ -13,6 +13,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>
     (opt =>
         {
@@ -26,10 +28,11 @@ builder.Services.AddMassTransit(config =>
 {
     config.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.Host(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
+        var host = builder.Configuration.GetValue<string>("EventBusSettings:HostAddress");
+        cfg.Host(host);
     });
 });
-//builder.Services.AddMassTransitHostedService();
+// builder.Services.AddMassTransitHostedService();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

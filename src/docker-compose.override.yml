@@ -54,6 +54,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - "CacheSettings:ConnectionString=basket.db:6379"
       - "GrpcSettings:DiscountUrl=http://discount.grpc"
+      - "EventBusSettings:HostAddress=amqp://admin:admin@rabbitmq:5672"
     depends_on:
       - basket.db
     ports:

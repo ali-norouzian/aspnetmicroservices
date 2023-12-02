@@ -5,6 +5,7 @@ using System.Net;
 using AutoMapper;
 using Basket.API.GrpcServices;
 using EventBus.Messages.Events;
+using MassTransit;
 
 namespace Basket.API.Controllers
 {
@@ -15,12 +16,14 @@ namespace Basket.API.Controllers
         private readonly IBasketRepository _basketRepository;
         private readonly DiscountGrpcServices _discountGrpcServices;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public BasketController(IBasketRepository basketRepository, DiscountGrpcServices discountGrpcServices, IMapper mapper)
+        public BasketController(IBasketRepository basketRepository, DiscountGrpcServices discountGrpcServices, IMapper mapper, IPublishEndpoint publishEndpoint)
         {
             _basketRepository = basketRepository;
             _discountGrpcServices = discountGrpcServices;
             _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpGet("{userName}", Name = "GetBasket")]
@@ -65,7 +68,9 @@ namespace Basket.API.Controllers
 
             // Send checkout event to rabbitmq
             var eventMessage = _mapper.Map<BasketCheckoutEvent>(basketCheckout);
+            eventMessage.TotalPrice = basket.TotalPrice;
             // _eventBus.PublishBasketCheckout
+            await _publishEndpoint.Publish(eventMessage);
 
             // Remove from queue
             await _basketRepository.DeleteBasket(basket.UserName);
