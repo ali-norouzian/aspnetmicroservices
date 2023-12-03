@@ -57,6 +57,7 @@ services:
       - "EventBusSettings:HostAddress=amqp://admin:admin@rabbitmq:5672"
     depends_on:
       - basket.db
+      - rabbitmq
     ports:
       - "8001:80"
 
@@ -124,8 +125,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:OrderingConnectionString=Server=localhost; Database=OrderDb; User Id=sa; Password=admin@1234; "
+      - "EventBusSettings:HostAddress=amqp://admin:admin@rabbitmq:5672"
     depends_on:
       - order.db
+      - rabbitmq
     ports:
       - "8004:80"
 
