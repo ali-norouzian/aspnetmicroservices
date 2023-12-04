@@ -145,3 +145,17 @@ services:
     ports:
       - "8010:80"
 
+
+  shopping.aggregator:
+    container_name: shopping.aggregator
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - catalog.api
+      - basket.api
+      - discount.api
+      - order.api
+      - ocelotapigw
+    ports:
+      - "8005:80"
+
