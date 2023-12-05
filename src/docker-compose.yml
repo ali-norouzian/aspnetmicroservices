@@ -4,6 +4,9 @@ services:
   portainer:
     image: portainer/portainer-ce:2.19.3-alpine
 
+  rabbitmq:
+    image: rabbitmq:3.12.9-management-alpine
+
 
   catalog.db:
     image: mongo:7.0.2
@@ -24,7 +27,54 @@ services:
       context: .
       dockerfile: Services/Basket/Basket.API/Dockerfile
 
+
+  discount.db:
+    image: postgres:16.0-alpine3.18
+
+  pgadmin:
+    image: dpage/pgadmin4:8.0
+
+  discount.api:
+    image: ${DOCKER_REGISTRY-}discount.api
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.API/Dockerfile
+
+  discount.grpc:
+    image: ${DOCKER_REGISTRY-}discount.grpc
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.Grpc/Dockerfile
+
+
+  order.db:
+    image: mcr.microsoft.com/mssql/server:2022-CU10-ubuntu-22.04
+
+  order.api:
+    image: ${DOCKER_REGISTRY-}order.api
+    build:
+      context: .
+      dockerfile: Services/Ordering/Ordering.API/Dockerfile
+
+
+  ocelotapigw:
+    image: ${DOCKER_REGISTRY-}ocelotapigw
+    build:
+      context: .
+      dockerfile: ApiGateways/OcelotApiGw/Dockerfile
+
+
+  shopping.aggregator:
+    image: ${DOCKER_REGISTRY-}shopping.aggregator
+    build:
+      context: .
+      dockerfile: ApiGateways/Shopping.Aggregator/Dockerfile
+
 volumes:
   mongo_data:
   portainer_data:
-      
+  postgres_data:
+  pgadmin_data:
+  mssqls_data:
+  rabbitmq_data:
+  

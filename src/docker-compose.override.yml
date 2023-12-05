@@ -11,6 +11,17 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - portainer_data:/data
 
+  rabbitmq:
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   catalog.db:
     container_name: catalog.db
@@ -42,7 +53,109 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "CacheSettings:ConnectionString=basket.db:6379"
+      - "GrpcSettings:DiscountUrl=http://discount.grpc"
+      - "EventBusSettings:HostAddress=amqp://admin:admin@rabbitmq:5672"
     depends_on:
       - basket.db
+      - rabbitmq
     ports:
       - "8001:80"
+
+
+  discount.db:
+    container_name: discount.db
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=DiscountDb
+  
+  pgadmin:
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    volumes:
+      - "pgadmin_data:/root/.pgadmin"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    depends_on:
+      - discount.db
+  
+  discount.api:
+    container_name: discount.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings:ConnectionString=Server=discount.db; Port=5432; Database=DiscountDb; User Id=admin; Password=admin; "
+    depends_on:
+      - discount.db
+    ports:
+      - "8002:80"
+
+  discount.grpc:
+    container_name: discount.grpc
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings:ConnectionString=Server=discount.db; Port=5432; Database=DiscountDb; User Id=admin; Password=admin; "
+    depends_on:
+      - discount.db
+    ports:
+      - "8003:80"
+
+
+  order.db:
+    container_name: order.db
+    restart: always
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqls_data:/var/opt/mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=admin@1234
+      - MSSQL_PID=Developer
+
+  order.api:
+    container_name: order.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:OrderingConnectionString=Server=localhost; Database=OrderDb; User Id=sa; Password=admin@1234; "
+      - "EventBusSettings:HostAddress=amqp://admin:admin@rabbitmq:5672"
+    depends_on:
+      - order.db
+      - rabbitmq
+    ports:
+      - "8004:80"
+
+
+  ocelotapigw:
+    container_name: ocelotapigw
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - catalog.api
+      - basket.api
+      - discount.api
+      - order.api
+    ports:
+      - "8010:80"
+
+
+  shopping.aggregator:
+    container_name: shopping.aggregator
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - catalog.api
+      - basket.api
+      - discount.api
+      - order.api
+      - ocelotapigw
+    ports:
+      - "8005:80"
+
